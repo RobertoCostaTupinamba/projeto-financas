@@ -29,6 +29,11 @@ export class MongoAccountRepository implements IAccountRepository {
     return docs.map(toPlain);
   }
 
+  async update(id: string, data: Partial<Pick<Account, 'name' | 'type' | 'closingDay' | 'dueDay'>>): Promise<Account | null> {
+    const doc = await AccountModel.findByIdAndUpdate(id, data, { new: true });
+    return doc ? toPlain(doc) : null;
+  }
+
   async delete(id: string): Promise<void> {
     await AccountModel.findByIdAndDelete(id);
   }

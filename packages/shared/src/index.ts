@@ -62,6 +62,29 @@ export interface IAccountRepository {
   create(data: CreateAccountDto): Promise<Account>;
   findById(id: string): Promise<Account | null>;
   findByUserId(userId: string): Promise<Account[]>;
+  update(id: string, data: Partial<Pick<Account, 'name' | 'type' | 'closingDay' | 'dueDay'>>): Promise<Account | null>;
+  delete(id: string): Promise<void>;
+}
+
+// ---- Category ----
+export interface Category {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: Date;
+}
+export interface CreateCategoryDto {
+  userId: string;
+  name: string;
+}
+export interface UpdateCategoryDto {
+  name: string;
+}
+export interface ICategoryRepository {
+  create(data: CreateCategoryDto): Promise<Category>;
+  findById(id: string): Promise<Category | null>;
+  findByUserId(userId: string): Promise<Category[]>;
+  update(id: string, data: UpdateCategoryDto): Promise<Category | null>;
   delete(id: string): Promise<void>;
 }
 export interface ITransactionRepository {
