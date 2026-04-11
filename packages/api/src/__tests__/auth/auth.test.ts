@@ -5,6 +5,8 @@ import { registerRoutes } from '../../app.js';
 import { connectDB, disconnectDB } from '../../infrastructure/db/connection.js';
 import { connectRedis, disconnectRedis, getRedisClient } from '../../infrastructure/redis/client.js';
 import { MongoUserRepository } from '../../infrastructure/repositories/MongoUserRepository.js';
+import { MongoAccountRepository } from '../../infrastructure/repositories/MongoAccountRepository.js';
+import { MongoCategoryRepository } from '../../infrastructure/repositories/MongoCategoryRepository.js';
 import { UserModel } from '../../infrastructure/db/UserModel.js';
 
 const TEST_MONGO_URI = 'mongodb://localhost:27017/financas_test';
@@ -17,8 +19,10 @@ beforeAll(async () => {
   connectRedis(TEST_REDIS_URI);
   const redis = getRedisClient();
   const userRepo = new MongoUserRepository();
+  const accountRepo = new MongoAccountRepository();
+  const categoryRepo = new MongoCategoryRepository();
   app = await buildServer();
-  await registerRoutes(app, { userRepo, redis });
+  await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo });
   await app.ready();
 });
 

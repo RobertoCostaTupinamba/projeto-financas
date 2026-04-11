@@ -1,11 +1,15 @@
 import type { FastifyInstance } from "fastify";
 import type { Redis } from "ioredis";
-import type { IUserRepository } from "@financas/shared";
+import type { IUserRepository, IAccountRepository, ICategoryRepository } from "@financas/shared";
 import authRoutes from "./routes/auth.js";
+import accountRoutes from "./routes/accounts.js";
+import categoryRoutes from "./routes/categories.js";
 
 interface RouteDeps {
   userRepo: IUserRepository;
   redis: Redis;
+  accountRepo: IAccountRepository;
+  categoryRepo: ICategoryRepository;
 }
 
 export async function registerRoutes(
@@ -20,5 +24,7 @@ export async function registerRoutes(
   // This keeps server.test.ts working (calls registerRoutes(app) with no deps).
   if (deps) {
     await app.register(authRoutes, deps);
+    await app.register(accountRoutes, { accountRepo: deps.accountRepo });
+    await app.register(categoryRoutes, { categoryRepo: deps.categoryRepo });
   }
 }
