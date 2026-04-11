@@ -1,4 +1,4 @@
-import { ITransactionRepository, Transaction, CreateTransactionDto } from '@financas/shared';
+import { ITransactionRepository, Transaction, CreateTransactionDto, UpdateTransactionDto } from '@financas/shared';
 import { TransactionModel } from '../db/TransactionModel.js';
 
 function toPlain(doc: any): Transaction {
@@ -34,6 +34,16 @@ export class MongoTransactionRepository implements ITransactionRepository {
   async findByAccountId(accountId: string): Promise<Transaction[]> {
     const docs = await TransactionModel.find({ accountId });
     return docs.map(toPlain);
+  }
+
+  async findByUserIdAndDateRange(userId: string, start: Date, end: Date): Promise<Transaction[]> {
+    const docs = await TransactionModel.find({ userId, date: { $gte: start, $lt: end } });
+    return docs.map(toPlain);
+  }
+
+  async update(id: string, data: UpdateTransactionDto): Promise<Transaction | null> {
+    const doc = await TransactionModel.findByIdAndUpdate(id, data, { new: true });
+    return doc ? toPlain(doc) : null;
   }
 
   async delete(id: string): Promise<void> {

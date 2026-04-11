@@ -51,6 +51,14 @@ export interface CreateTransactionDto {
   date: Date;
   description?: string;
 }
+export interface UpdateTransactionDto {
+  amount?: number;
+  type?: TransactionType;
+  categoryId?: string;
+  accountId?: string;
+  date?: Date;
+  description?: string;
+}
 
 // ---- Repository Interfaces ----
 export interface IUserRepository {
@@ -92,5 +100,7 @@ export interface ITransactionRepository {
   findById(id: string): Promise<Transaction | null>;
   findByUserId(userId: string): Promise<Transaction[]>;
   findByAccountId(accountId: string): Promise<Transaction[]>;
+  findByUserIdAndDateRange(userId: string, start: Date, end: Date): Promise<Transaction[]>;
+  update(id: string, data: UpdateTransactionDto): Promise<Transaction | null>;
   delete(id: string): Promise<void>;
 }

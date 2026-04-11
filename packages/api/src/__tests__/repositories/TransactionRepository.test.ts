@@ -68,4 +68,62 @@ describe('MongoTransactionRepository', () => {
     const txs = await repo.findByUserId(userId2);
     expect(txs).toEqual([]);
   });
+
+  it('findByUserIdAndDateRange returns transactions within range (exclusive end)', async () => {
+    const jan10 = new Date('2026-01-10');
+    const jan20 = new Date('2026-01-20');
+    const jan25 = new Date('2026-01-25');
+    await repo.create({ userId: userId1, accountId: accountId1, amount: 100, type: 'EXPENSE', date: jan10 });
+    await repo.create({ userId: userId1, accountId: accountId1, amount: 200, type: 'EXPENSE', date: jan20 });
+    await repo.create({ userId: userId1, accountId: accountId1, amount: 300, type: 'INCOME', date: jan25 });
+    const results = await repo.findByUserIdAndDateRange(userId1, jan10, jan25);
+    expect(results).toHaveLength(2);
+    expect(results.map(t => t.amount).sort()).toEqual([100, 200]);
+  });
+
+  it('findByUserIdAndDateRange returns [] when no transactions in range', async () => {
+    const feb1 = new Date('2026-02-01');
+    const feb28 = new Date('2026-02-28');
+    const results = await repo.findByUserIdAndDateRange(userId1, feb1, feb28);
+    expect(results).toEqual([]);
+  });
+
+  it('findByUserIdAndDateRange: transaction at start is included, at end is excluded', async () => {
+    const start = new Date('2026-03-01');
+    const end = new Date('2026-03-31');
+    await repo.create({ userId: userId1, accountId: accountId1, amount: 500, type: 'EXPENSE', date: start });
+    await repo.create({ userId: userId1, accountId: accountId1, amount: 600, type: 'INCOME', date: end });
+    const results = await repo.findByUserIdAndDateRange(userId1, start, end);
+    expect(results).toHaveLength(1);
+    expect(results[0].amount).toBe(500);
+  });
+
+  it('findByUserIdAndDateRange with start === end returns []', async () => {
+    const same = new Date('2026-04-15');
+    await repo.create({ userId: userId1, accountId: accountId1, amount: 999, type: 'EXPENSE', date: same });
+    const results = await repo.findByUserIdAndDateRange(userId1, same, same);
+    expect(results).toEqual([]);
+  });
+
+  it('update modifies transaction fields and returns updated transaction', async () => {
+    const tx = await repo.create({
+      userId: userId1,
+      accountId: accountId1,
+      amount: 1000,
+      type: 'EXPENSE',
+      date: baseDate,
+      description: 'original',
+    });
+    const updated = await repo.update(tx.id, { amount: 2000, description: 'updated' });
+    expect(updated).not.toBeNull();
+    expect(updated!.amount).toBe(2000);
+    expect(updated!.description).toBe('updated');
+    expect(updated!.type).toBe('EXPENSE');
+  });
+
+  it('update with non-existent id returns null', async () => {
+    const fakeId = new mongoose.Types.ObjectId().toString();
+    const result = await repo.update(fakeId, { amount: 100 });
+    expect(result).toBeNull();
+  });
 });
