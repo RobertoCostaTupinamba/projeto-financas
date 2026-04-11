@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Block commits when untracked files exist — ensures commit contents match
+# the commit message description. Stage the files or add them to .gitignore.
+untracked=$(git status --porcelain | grep -E '^\?\?' || true)
+if [[ -n "$untracked" ]]; then
+  echo ""
+  echo "COMMIT BLOCKED -- untracked files detected:"
+  echo ""
+  echo "$untracked" | sed 's/^?? /  - /'
+  echo ""
+  echo "Stage them (git add ...) or add to .gitignore."
+  echo ""
+  exit 1
+fi
+
+# Block commits when tracked files have unstaged changes — ensures nothing
+# was accidentally left out of the staging area.
+unstaged=$(git status --porcelain | grep -E '^[ MARC][MD]' || true)
+if [[ -n "$unstaged" ]]; then
+  echo ""
+  echo "COMMIT BLOCKED -- tracked files with unstaged changes:"
+  echo ""
+  echo "$unstaged" | sed 's/^/  /'
+  echo ""
+  echo "Stage them (git add ...) or stash if intentional."
+  echo ""
+  exit 1
+fi
+
+exit 0
