@@ -1,0 +1,73 @@
+
+# ── GSD / AI tooling ──
+.gsd
+.gsd-id
+.bg-shell/
+.agents/
+.claude/
+.kiro/
+.mcp.json
+skills-lock.json
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Editor ──
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# ── Environment & secrets ──
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# ── Certificates & private keys ──
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# ── Docker local overrides (may contain secrets) ──
+docker-compose.override.yml
+
+# ── Node / pnpm ──
+node_modules/
+.pnpm-store/
+
+# ── TypeScript build cache ──
+*.tsbuildinfo
+
+# ── Next.js ──
+.next/
+
+# ── Turborepo ──
+.turbo/
+
+# ── Build outputs ──
+dist/
+build/
+
+# ── Python (if any tooling) ──
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ── Java / Rust / Go (if any tooling) ──
+target/
+vendor/
+
+# ── Logs & test artifacts ──
+*.log
+coverage/
+.cache/
+tmp/
