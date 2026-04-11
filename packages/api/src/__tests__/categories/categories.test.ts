@@ -7,6 +7,7 @@ import { connectRedis, disconnectRedis, getRedisClient } from '../../infrastruct
 import { MongoUserRepository } from '../../infrastructure/repositories/MongoUserRepository.js';
 import { MongoAccountRepository } from '../../infrastructure/repositories/MongoAccountRepository.js';
 import { MongoCategoryRepository } from '../../infrastructure/repositories/MongoCategoryRepository.js';
+import { MongoTransactionRepository } from '../../infrastructure/repositories/MongoTransactionRepository.js';
 import { UserModel } from '../../infrastructure/db/UserModel.js';
 import { CategoryModel } from '../../infrastructure/db/CategoryModel.js';
 
@@ -22,8 +23,9 @@ beforeAll(async () => {
   const userRepo = new MongoUserRepository();
   const accountRepo = new MongoAccountRepository();
   const categoryRepo = new MongoCategoryRepository();
+  const transactionRepo = new MongoTransactionRepository();
   app = await buildServer();
-  await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo });
+  await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo, transactionRepo });
   await app.ready();
 });
 
