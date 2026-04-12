@@ -233,6 +233,51 @@ describe('GET /transactions/summary', () => {
   });
 });
 
+describe('GET /transactions/summary — pending_review exclusion', () => {
+  it('pending_review transaction is excluded from summary totals', async () => {
+    const token = await registerAndLogin(app);
+
+    // Create a confirmed EXPENSE via the HTTP route (should appear in summary)
+    const catRes = await app.inject({
+      method: 'POST',
+      url: '/categories',
+      headers: { Authorization: `Bearer ${token}` },
+      payload: { name: 'Confirmed' },
+    });
+    const categoryId = catRes.json().id as string;
+    await createTransaction(token, { categoryId, amount: 3000, date: '2026-04-15' });
+
+    // Decode userId from the JWT to create a repo-level pending_review transaction
+    const [, payloadB64] = token.split('.');
+    const { sub: userId } = JSON.parse(Buffer.from(payloadB64, 'base64url').toString());
+
+    const transactionRepo = new MongoTransactionRepository();
+    await transactionRepo.create({
+      userId,
+      accountId: FAKE_ACCOUNT_ID,
+      amount: 9999,
+      type: 'EXPENSE',
+      date: new Date('2026-04-20'),
+      status: 'pending_review',
+      importSessionId: 'test-session-001',
+    });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/transactions/summary?month=2026-04',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const summary = res.json();
+    // The confirmed transaction should appear
+    expect(summary['Confirmed']).toBe(3000);
+    // The pending_review transaction (9999) must NOT contribute to any total
+    const total = Object.values(summary as Record<string, number>).reduce((a, b) => a + b, 0);
+    expect(total).toBe(3000);
+  });
+});
+
 describe('PUT /transactions/:id', () => {
   it('200 updated fields reflected in response', async () => {
     const token = await registerAndLogin(app);

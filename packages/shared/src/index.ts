@@ -31,6 +31,7 @@ export interface CreateAccountDto {
 
 // ---- Transaction ----
 export type TransactionType = 'INCOME' | 'EXPENSE';
+export type TransactionStatus = 'confirmed' | 'pending_review';
 export interface Transaction {
   id: string;
   userId: string;
@@ -38,8 +39,10 @@ export interface Transaction {
   categoryId?: string;
   amount: number; // stored in centavos (integer) — e.g. 1000 = R$10.00
   type: TransactionType;
+  status: TransactionStatus;
   date: Date;
   description?: string;
+  importSessionId?: string;
   createdAt: Date;
 }
 export interface CreateTransactionDto {
@@ -50,6 +53,8 @@ export interface CreateTransactionDto {
   type: TransactionType;
   date: Date;
   description?: string;
+  status?: TransactionStatus;
+  importSessionId?: string;
 }
 export interface UpdateTransactionDto {
   amount?: number;
@@ -101,6 +106,7 @@ export interface ITransactionRepository {
   findByUserId(userId: string): Promise<Transaction[]>;
   findByAccountId(accountId: string): Promise<Transaction[]>;
   findByUserIdAndDateRange(userId: string, start: Date, end: Date): Promise<Transaction[]>;
+  findPotentialDuplicates(userId: string, accountId: string, amount: number, dateFrom: Date, dateTo: Date): Promise<Transaction[]>;
   update(id: string, data: UpdateTransactionDto): Promise<Transaction | null>;
   delete(id: string): Promise<void>;
 }

@@ -9,8 +9,10 @@ function toPlain(doc: any): Transaction {
     categoryId: doc.categoryId,
     amount: doc.amount,
     type: doc.type,
+    status: doc.status ?? 'confirmed',
     date: doc.date,
     description: doc.description,
+    importSessionId: doc.importSessionId,
     createdAt: doc.createdAt,
   };
 }
@@ -37,7 +39,27 @@ export class MongoTransactionRepository implements ITransactionRepository {
   }
 
   async findByUserIdAndDateRange(userId: string, start: Date, end: Date): Promise<Transaction[]> {
-    const docs = await TransactionModel.find({ userId, date: { $gte: start, $lt: end } });
+    const docs = await TransactionModel.find({
+      userId,
+      date: { $gte: start, $lt: end },
+      status: { $ne: 'pending_review' },
+    });
+    return docs.map(toPlain);
+  }
+
+  async findPotentialDuplicates(
+    userId: string,
+    accountId: string,
+    amount: number,
+    dateFrom: Date,
+    dateTo: Date,
+  ): Promise<Transaction[]> {
+    const docs = await TransactionModel.find({
+      userId,
+      accountId,
+      amount,
+      date: { $gte: dateFrom, $lte: dateTo },
+    });
     return docs.map(toPlain);
   }
 

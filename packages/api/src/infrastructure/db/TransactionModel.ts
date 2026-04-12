@@ -7,8 +7,10 @@ const transactionSchema = new Schema({
   // Amount stored as integer centavos to avoid floating-point rounding errors
   amount: { type: Number, required: true },
   type: { type: String, enum: ['INCOME', 'EXPENSE'], required: true },
+  status: { type: String, enum: ['confirmed', 'pending_review'], default: 'confirmed', required: true },
   date: { type: Date, required: true },
   description: { type: String },
+  importSessionId: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 
