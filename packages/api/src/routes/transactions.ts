@@ -6,6 +6,7 @@ import { GetTransactionsUseCase } from '../use-cases/transactions/GetTransaction
 import { GetTransactionSummaryUseCase } from '../use-cases/transactions/GetTransactionSummaryUseCase.js';
 import { UpdateTransactionUseCase } from '../use-cases/transactions/UpdateTransactionUseCase.js';
 import { DeleteTransactionUseCase } from '../use-cases/transactions/DeleteTransactionUseCase.js';
+import { ImportTransactionsUseCase } from '../use-cases/transactions/ImportTransactionsUseCase.js';
 
 interface TransactionRouteOptions {
   transactionRepo: ITransactionRepository;
@@ -33,6 +34,7 @@ export default async function transactionRoutes(
   const getSummaryUC = new GetTransactionSummaryUseCase(transactionRepo, categoryRepo);
   const updateUC = new UpdateTransactionUseCase(transactionRepo);
   const deleteUC = new DeleteTransactionUseCase(transactionRepo);
+  const importUC = new ImportTransactionsUseCase(transactionRepo);
 
   const verifyJwt = makeVerifyJwt(JWT_SECRET);
 
@@ -166,6 +168,44 @@ export default async function transactionRoutes(
         }
         throw err;
       }
+    },
+  );
+
+  // POST /transactions/import — multipart CSV upload
+  app.post(
+    '/transactions/import',
+    { preHandler: verifyJwt },
+    async (request, reply) => {
+      const userId = request.user!.id;
+
+      const parts = request.parts();
+      let accountId: string | undefined;
+      let csvText: string | undefined;
+
+      for await (const part of parts) {
+        if (part.type === 'field' && part.fieldname === 'accountId') {
+          accountId = part.value as string;
+        } else if (part.type === 'file' && part.fieldname === 'file') {
+          const buf = await part.toBuffer();
+          csvText = buf.toString('utf-8');
+        }
+      }
+
+      if (!accountId) {
+        return reply.code(400).send({ error: 'accountId is required' });
+      }
+      if (!csvText) {
+        return reply.code(400).send({ error: 'file is required' });
+      }
+
+      const result = await importUC.execute(userId, accountId, csvText);
+
+      app.log.info(
+        { sessionId: result.sessionId, userId, newCount: result.new.length, duplicateCount: result.probableDuplicates.length, ignoredCount: result.ignored.length },
+        'Import completed',
+      );
+
+      return reply.code(200).send(result);
     },
   );
 }
