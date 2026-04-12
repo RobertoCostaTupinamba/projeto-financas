@@ -104,6 +104,12 @@ export default function Home() {
             >
               + Lançamento
             </button>
+            <button
+              onClick={() => router.push('/import')}
+              className="px-3 py-1.5 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+            >
+              Importar extrato
+            </button>
           </div>
         </div>
 

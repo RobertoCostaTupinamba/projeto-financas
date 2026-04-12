@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js";
 import accountRoutes from "./routes/accounts.js";
 import categoryRoutes from "./routes/categories.js";
 import transactionRoutes from "./routes/transactions.js";
+import importRoutes from "./routes/import.js";
 
 interface RouteDeps {
   userRepo: IUserRepository;
@@ -29,5 +30,6 @@ export async function registerRoutes(
     await app.register(accountRoutes, { accountRepo: deps.accountRepo });
     await app.register(categoryRoutes, { categoryRepo: deps.categoryRepo });
     await app.register(transactionRoutes, { transactionRepo: deps.transactionRepo, categoryRepo: deps.categoryRepo });
+    await app.register(importRoutes, { transactionRepo: deps.transactionRepo });
   }
 }
