@@ -13,6 +13,7 @@ function toPlain(doc: any): Transaction {
     date: doc.date,
     description: doc.description,
     importSessionId: doc.importSessionId,
+    importBucket: doc.importBucket,
     createdAt: doc.createdAt,
   };
 }
@@ -61,6 +62,15 @@ export class MongoTransactionRepository implements ITransactionRepository {
       date: { $gte: dateFrom, $lte: dateTo },
     });
     return docs.map(toPlain);
+  }
+
+  async findByImportSession(importSessionId: string): Promise<Transaction[]> {
+    const docs = await TransactionModel.find({ importSessionId });
+    return docs.map(toPlain);
+  }
+
+  async deleteByImportSession(importSessionId: string): Promise<void> {
+    await TransactionModel.deleteMany({ importSessionId });
   }
 
   async update(id: string, data: UpdateTransactionDto): Promise<Transaction | null> {

@@ -16,6 +16,7 @@ const makeTransaction = (data: CreateTransactionDto): Transaction => ({
   date: data.date,
   description: data.description,
   importSessionId: data.importSessionId,
+  importBucket: data.importBucket,
   createdAt: new Date(),
 });
 
@@ -26,6 +27,8 @@ const makeRepo = (overrides?: Partial<ITransactionRepository>): ITransactionRepo
   findByAccountId: vi.fn(async () => []),
   findByUserIdAndDateRange: vi.fn(async () => []),
   findPotentialDuplicates: vi.fn(async () => []),
+  findByImportSession: vi.fn(async () => []),
+  deleteByImportSession: vi.fn(async () => {}),
   update: vi.fn(async () => null),
   delete: vi.fn(async () => {}),
   ...overrides,
@@ -116,6 +119,7 @@ describe('ImportTransactionsUseCase', () => {
     const callArg = createSpy.mock.calls[0][0] as CreateTransactionDto;
     expect(callArg.status).toBe('pending_review');
     expect(callArg.importSessionId).toBe(result.sessionId);
+    expect(callArg.importBucket).toBe('new'); // no duplicate → 'new'
     expect(callArg.amount).toBe(2000); // R$20.00 → 2000 centavos
     expect(callArg.type).toBe('EXPENSE');
   });

@@ -11,6 +11,7 @@ const transactionSchema = new Schema({
   date: { type: Date, required: true },
   description: { type: String },
   importSessionId: { type: String },
+  importBucket: { type: String, enum: ['new', 'probable_duplicate'] },
   createdAt: { type: Date, default: Date.now },
 });
 

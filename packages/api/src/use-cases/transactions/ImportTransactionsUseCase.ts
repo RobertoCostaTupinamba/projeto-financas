@@ -36,6 +36,7 @@ export class ImportTransactionsUseCase {
         dateTo,
       );
 
+      const bucket = matches.length > 0 ? 'probable_duplicate' : 'new';
       const saved = await this.transactionRepo.create({
         userId,
         accountId,
@@ -45,9 +46,10 @@ export class ImportTransactionsUseCase {
         description: row.description,
         status: 'pending_review',
         importSessionId: sessionId,
+        importBucket: bucket,
       });
 
-      if (matches.length > 0) {
+      if (bucket === 'probable_duplicate') {
         probableDuplicates.push(saved);
       } else {
         newTransactions.push(saved);

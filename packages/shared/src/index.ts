@@ -32,6 +32,7 @@ export interface CreateAccountDto {
 // ---- Transaction ----
 export type TransactionType = 'INCOME' | 'EXPENSE';
 export type TransactionStatus = 'confirmed' | 'pending_review';
+export type ImportBucket = 'new' | 'probable_duplicate';
 export interface Transaction {
   id: string;
   userId: string;
@@ -43,6 +44,7 @@ export interface Transaction {
   date: Date;
   description?: string;
   importSessionId?: string;
+  importBucket?: ImportBucket;
   createdAt: Date;
 }
 export interface CreateTransactionDto {
@@ -55,6 +57,7 @@ export interface CreateTransactionDto {
   description?: string;
   status?: TransactionStatus;
   importSessionId?: string;
+  importBucket?: ImportBucket;
 }
 export interface UpdateTransactionDto {
   amount?: number;
@@ -63,6 +66,7 @@ export interface UpdateTransactionDto {
   accountId?: string;
   date?: Date;
   description?: string;
+  status?: TransactionStatus;
 }
 
 // ---- Repository Interfaces ----
@@ -107,6 +111,8 @@ export interface ITransactionRepository {
   findByAccountId(accountId: string): Promise<Transaction[]>;
   findByUserIdAndDateRange(userId: string, start: Date, end: Date): Promise<Transaction[]>;
   findPotentialDuplicates(userId: string, accountId: string, amount: number, dateFrom: Date, dateTo: Date): Promise<Transaction[]>;
+  findByImportSession(importSessionId: string): Promise<Transaction[]>;
+  deleteByImportSession(importSessionId: string): Promise<void>;
   update(id: string, data: UpdateTransactionDto): Promise<Transaction | null>;
   delete(id: string): Promise<void>;
 }
