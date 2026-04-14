@@ -103,17 +103,17 @@ function buildMultipartBody(accountId: string, csvContent: string): Buffer {
 
 /**
  * Fixture CSV:
- * - Row 1: valid EXPENSE 2026-04-10 → will be "new"
- * - Row 2: valid EXPENSE 2026-04-11 → will be "new"
- * - Row 3: valid EXPENSE 2026-04-15 → will match pre-created confirmed tx → probableDuplicate
+ * - Row 1: valid EXPENSE 10/04/2026 → will be "new"
+ * - Row 2: valid EXPENSE 11/04/2026 → will be "new"
+ * - Row 3: valid EXPENSE 15/04/2026 → will match pre-created confirmed tx → probableDuplicate
  * - Row 4: invalid date → ignored
  */
 const IMPORT_MONTH = '2026-04';
 const FIXTURE_CSV = [
   'Data,Valor,Identificador,Descrição',
-  '2026-04-10,-50.00,ext-001,Coffee',
-  '2026-04-11,-30.00,ext-002,Lunch',
-  '2026-04-15,-200.00,ext-003,Supermarket',
+  '10/04/2026,-50.00,ext-001,Coffee',
+  '11/04/2026,-30.00,ext-002,Lunch',
+  '15/04/2026,-200.00,ext-003,Supermarket',
   'not-a-date,-10.00,ext-004,Bad Row',
 ].join('\n');
 
@@ -252,7 +252,7 @@ describe('Merchant-rule integration in import pipeline', () => {
     // Import a CSV with 'UBER EATS' description
     const csv = [
       'Data,Valor,Identificador,Descrição',
-      '2026-04-10,-50.00,ue-001,UBER EATS',
+      '10/04/2026,-50.00,ue-001,UBER EATS',
     ].join('\n');
 
     const body = buildMultipartBody(FAKE_ACCOUNT_ID, csv);
@@ -298,7 +298,7 @@ describe('Merchant-rule integration in import pipeline', () => {
     // Import with a fuzzy description 'UBER *EATS BR' that doesn't exact-match but should partial-match
     const csv = [
       'Data,Valor,Identificador,Descrição',
-      '2026-04-10,-50.00,ue-002,UBER *EATS BR',
+      '10/04/2026,-50.00,ue-002,UBER *EATS BR',
     ].join('\n');
 
     const body = buildMultipartBody(FAKE_ACCOUNT_ID, csv);
@@ -340,7 +340,7 @@ describe('Merchant-rule integration in import pipeline', () => {
     // Import a transaction
     const csv = [
       'Data,Valor,Identificador,Descrição',
-      '2026-04-10,-39.90,ap-001,AMAZON PRIME',
+      '10/04/2026,-39.90,ap-001,AMAZON PRIME',
     ].join('\n');
 
     const body = buildMultipartBody(FAKE_ACCOUNT_ID, csv);
@@ -404,7 +404,7 @@ describe('Merchant-rule integration in import pipeline', () => {
     // Import a transaction
     const csv = [
       'Data,Valor,Identificador,Descrição',
-      '2026-04-10,-55.90,nf-001,NETFLIX BR',
+      '10/04/2026,-55.90,nf-001,NETFLIX BR',
     ].join('\n');
 
     const body = buildMultipartBody(FAKE_ACCOUNT_ID, csv);

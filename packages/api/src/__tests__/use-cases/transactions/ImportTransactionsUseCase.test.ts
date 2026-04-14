@@ -44,10 +44,10 @@ describe('ImportTransactionsUseCase', () => {
     // Row 4 will match a duplicate
     const csv = [
       VALID_CSV_HEADER,
-      '2026-01-10,-50.00,ext-001,Supermercado',
-      '2026-01-11,-30.00,ext-002,Farmacia',
-      '2026-01-12,-baddate,ext-003,Invalid Row',  // bad amount → ignored
-      '2026-01-13,-100.00,ext-004,Restaurante',
+      '10/01/2026,-50.00,ext-001,Supermercado',
+      '11/01/2026,-30.00,ext-002,Farmacia',
+      '12/01/2026,-baddate,ext-003,Invalid Row',  // bad amount → ignored
+      '13/01/2026,-100.00,ext-004,Restaurante',
     ].join('\n');
 
     // Row for ext-004 will find a duplicate
@@ -106,7 +106,7 @@ describe('ImportTransactionsUseCase', () => {
   it('persists each row with status=pending_review and the session importSessionId', async () => {
     const csv = [
       VALID_CSV_HEADER,
-      '2026-02-01,-20.00,ext-010,Uber',
+      '01/02/2026,-20.00,ext-010,Uber',
     ].join('\n');
 
     const createSpy = vi.fn(async (data: CreateTransactionDto) => makeTransaction(data));
@@ -127,7 +127,7 @@ describe('ImportTransactionsUseCase', () => {
   it('classifies income rows (positive valor) correctly', async () => {
     const csv = [
       VALID_CSV_HEADER,
-      '2026-03-01,500.00,ext-020,Salario',
+      '01/03/2026,500.00,ext-020,Salario',
     ].join('\n');
 
     const repo = makeRepo();

@@ -79,9 +79,9 @@ function buildMultipartBody(accountId: string, csvContent: string): Buffer {
 const IMPORT_MONTH = '2026-04';
 const FIXTURE_CSV = [
   'Data,Valor,Identificador,Descrição',
-  '2026-04-10,-50.00,rev-001,Coffee',
-  '2026-04-11,-30.00,rev-002,Lunch',
-  '2026-04-15,-200.00,rev-003,Supermarket',
+  '10/04/2026,-50.00,rev-001,Coffee',
+  '11/04/2026,-30.00,rev-002,Lunch',
+  '15/04/2026,-200.00,rev-003,Supermarket',
   'not-a-date,-10.00,rev-004,Bad Row',
 ].join('\n');
 

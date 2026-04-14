@@ -53,14 +53,15 @@ export class NubankCsvParser {
       const description = descParts.join(',').trim();
       const externalId = rawId.trim();
 
-      // Validate date
+      // Nubank CSV uses DD/MM/YYYY format
       const dateStr = rawDate.trim();
-      const dateMs = Date.parse(dateStr);
-      if (isNaN(dateMs)) {
+      const dateParts = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!dateParts) {
         ignored.push({ rowIndex, rawLine, reason: `Invalid date: "${dateStr}"` });
         continue;
       }
-      const date = new Date(dateMs);
+      const [, dd, mm, yyyy] = dateParts;
+      const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
 
       // Validate amount
       const valor = parseFloat(rawValor.trim());
