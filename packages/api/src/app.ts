@@ -1,11 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import type { Redis } from "ioredis";
-import type { IUserRepository, IAccountRepository, ICategoryRepository, ITransactionRepository } from "@financas/shared";
+import type { IUserRepository, IAccountRepository, ICategoryRepository, ITransactionRepository, IMerchantRuleRepository } from "@financas/shared";
 import authRoutes from "./routes/auth.js";
 import accountRoutes from "./routes/accounts.js";
 import categoryRoutes from "./routes/categories.js";
 import transactionRoutes from "./routes/transactions.js";
 import importRoutes from "./routes/import.js";
+import merchantRuleRoutes from "./routes/merchant-rules.js";
 
 interface RouteDeps {
   userRepo: IUserRepository;
@@ -13,6 +14,7 @@ interface RouteDeps {
   accountRepo: IAccountRepository;
   categoryRepo: ICategoryRepository;
   transactionRepo: ITransactionRepository;
+  merchantRuleRepo: IMerchantRuleRepository;
 }
 
 export async function registerRoutes(
@@ -31,5 +33,6 @@ export async function registerRoutes(
     await app.register(categoryRoutes, { categoryRepo: deps.categoryRepo });
     await app.register(transactionRoutes, { transactionRepo: deps.transactionRepo, categoryRepo: deps.categoryRepo });
     await app.register(importRoutes, { transactionRepo: deps.transactionRepo });
+    await app.register(merchantRuleRoutes, { merchantRuleRepo: deps.merchantRuleRepo });
   }
 }

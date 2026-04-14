@@ -10,6 +10,7 @@ import { MongoUserRepository } from "./infrastructure/repositories/MongoUserRepo
 import { MongoAccountRepository } from "./infrastructure/repositories/MongoAccountRepository.js";
 import { MongoCategoryRepository } from "./infrastructure/repositories/MongoCategoryRepository.js";
 import { MongoTransactionRepository } from "./infrastructure/repositories/MongoTransactionRepository.js";
+import { MongoMerchantRuleRepository } from "./infrastructure/repositories/MongoMerchantRuleRepository.js";
 
 const MONGODB_URI =
   process.env["MONGODB_URI"] ?? "mongodb://localhost:27017/financas";
@@ -23,11 +24,12 @@ const userRepo = new MongoUserRepository();
 const accountRepo = new MongoAccountRepository();
 const categoryRepo = new MongoCategoryRepository();
 const transactionRepo = new MongoTransactionRepository();
+const merchantRuleRepo = new MongoMerchantRuleRepository();
 const redis = getRedisClient();
 
 const app = await buildServer();
 
-await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo, transactionRepo });
+await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo, transactionRepo, merchantRuleRepo });
 
 // Graceful shutdown — release connections on SIGINT (Ctrl-C)
 process.on("SIGINT", async () => {
