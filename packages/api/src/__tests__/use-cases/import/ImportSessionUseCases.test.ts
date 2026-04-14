@@ -98,7 +98,7 @@ describe('ConfirmImportUseCase', () => {
     });
 
     const useCase = new ConfirmImportUseCase(repo);
-    const result = await useCase.execute('sess-1', [{ transactionId: tx1.id, action: 'accept' }]);
+    const result = await useCase.execute('sess-1', 'u1', [{ transactionId: tx1.id, action: 'accept' }]);
 
     expect(updateSpy).toHaveBeenCalledWith(tx1.id, { status: 'confirmed' });
     expect(result.accepted).toHaveLength(1);
@@ -116,7 +116,7 @@ describe('ConfirmImportUseCase', () => {
     });
 
     const useCase = new ConfirmImportUseCase(repo);
-    const result = await useCase.execute('sess-1', [{ transactionId: tx1.id, action: 'reject' }]);
+    const result = await useCase.execute('sess-1', 'u1', [{ transactionId: tx1.id, action: 'reject' }]);
 
     expect(deleteSpy).toHaveBeenCalledWith(tx1.id);
     expect(result.accepted).toHaveLength(0);
@@ -137,7 +137,7 @@ describe('ConfirmImportUseCase', () => {
     });
 
     const useCase = new ConfirmImportUseCase(repo);
-    const result = await useCase.execute('sess-1', [{ transactionId: decidedTx.id, action: 'accept' }]);
+    const result = await useCase.execute('sess-1', 'u1', [{ transactionId: decidedTx.id, action: 'accept' }]);
 
     // orphan must be cleaned
     expect(deleteSpy).toHaveBeenCalledWith(orphanTx.id);
@@ -157,7 +157,7 @@ describe('ConfirmImportUseCase', () => {
     });
 
     const useCase = new ConfirmImportUseCase(repo);
-    const result = await useCase.execute('sess-1', [{ transactionId: tx.id, action: 'accept' }]);
+    const result = await useCase.execute('sess-1', 'u1', [{ transactionId: tx.id, action: 'accept' }]);
 
     // delete was NOT called for the decided tx
     expect(deleteSpy).not.toHaveBeenCalled();
@@ -174,7 +174,7 @@ describe('ConfirmImportUseCase', () => {
     });
 
     const useCase = new ConfirmImportUseCase(repo);
-    const result = await useCase.execute('sess-1', []);
+    const result = await useCase.execute('sess-1', 'u1', []);
 
     expect(deleteSpy).toHaveBeenCalledWith(orphan.id);
     expect(result.accepted).toHaveLength(0);

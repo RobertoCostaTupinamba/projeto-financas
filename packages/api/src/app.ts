@@ -14,7 +14,7 @@ interface RouteDeps {
   accountRepo: IAccountRepository;
   categoryRepo: ICategoryRepository;
   transactionRepo: ITransactionRepository;
-  merchantRuleRepo: IMerchantRuleRepository;
+  merchantRuleRepo?: IMerchantRuleRepository;
 }
 
 export async function registerRoutes(
@@ -31,8 +31,10 @@ export async function registerRoutes(
     await app.register(authRoutes, deps);
     await app.register(accountRoutes, { accountRepo: deps.accountRepo });
     await app.register(categoryRoutes, { categoryRepo: deps.categoryRepo });
-    await app.register(transactionRoutes, { transactionRepo: deps.transactionRepo, categoryRepo: deps.categoryRepo });
-    await app.register(importRoutes, { transactionRepo: deps.transactionRepo });
-    await app.register(merchantRuleRoutes, { merchantRuleRepo: deps.merchantRuleRepo });
+    await app.register(transactionRoutes, { transactionRepo: deps.transactionRepo, categoryRepo: deps.categoryRepo, merchantRuleRepo: deps.merchantRuleRepo });
+    await app.register(importRoutes, { transactionRepo: deps.transactionRepo, merchantRuleRepo: deps.merchantRuleRepo });
+    if (deps.merchantRuleRepo) {
+      await app.register(merchantRuleRoutes, { merchantRuleRepo: deps.merchantRuleRepo });
+    }
   }
 }

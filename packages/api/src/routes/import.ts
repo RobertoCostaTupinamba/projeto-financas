@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import type { ITransactionRepository } from '@financas/shared';
+import type { ITransactionRepository, IMerchantRuleRepository } from '@financas/shared';
 import { makeVerifyJwt } from '../middleware/authenticate.js';
 import { GetImportSessionUseCase } from '../use-cases/import/GetImportSessionUseCase.js';
 import { ConfirmImportUseCase, type ImportDecision } from '../use-cases/import/ConfirmImportUseCase.js';
@@ -7,6 +7,7 @@ import { CancelImportUseCase } from '../use-cases/import/CancelImportUseCase.js'
 
 interface ImportRouteOptions {
   transactionRepo: ITransactionRepository;
+  merchantRuleRepo?: IMerchantRuleRepository;
 }
 
 const JWT_SECRET = process.env['JWT_SECRET'] ?? 'dev-secret-change-in-prod';
@@ -15,7 +16,7 @@ export default async function importRoutes(
   app: FastifyInstance,
   opts: ImportRouteOptions,
 ): Promise<void> {
-  const { transactionRepo } = opts;
+  const { transactionRepo, merchantRuleRepo } = opts;
 
   const getSessionUC = new GetImportSessionUseCase(transactionRepo);
   const confirmUC = new ConfirmImportUseCase(transactionRepo);
@@ -49,7 +50,8 @@ export default async function importRoutes(
         return reply.code(400).send({ error: 'decisions must be an array' });
       }
 
-      const result = await confirmUC.execute(sessionId, decisions);
+      const userId = request.user!.id;
+      const result = await confirmUC.execute(sessionId, userId, decisions, merchantRuleRepo);
 
       app.log.info(
         { sessionId, accepted: result.accepted.length, rejected: result.rejected, cleaned: result.cleaned },

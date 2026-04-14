@@ -118,7 +118,7 @@ export interface ITransactionRepository {
 }
 
 // ---- MerchantRule ----
-export type MatchType = 'exact' | 'partial';
+export type MatchType = 'exact' | 'partial' | 'confirmed_partial';
 
 export interface MerchantRule {
   id: string;
@@ -146,8 +146,8 @@ export interface IMerchantRuleRepository {
 
 // ---- PartialMatchSuggestion (used by ImportTransactionsUseCase in T04) ----
 export interface PartialMatchSuggestion {
-  transactionDescription: string;
-  rule: MerchantRule;
-  /** similarity score 0–1 */
-  score: number;
+  transactionId: string;
+  suggestedCategoryId: string;
+  matchedPattern: string;
+  ruleId: string;
 }

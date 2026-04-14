@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import type { ITransactionRepository, ICategoryRepository, TransactionType, UpdateTransactionDto } from '@financas/shared';
+import type { ITransactionRepository, ICategoryRepository, IMerchantRuleRepository, TransactionType, UpdateTransactionDto } from '@financas/shared';
 import { makeVerifyJwt } from '../middleware/authenticate.js';
 import { CreateTransactionUseCase } from '../use-cases/transactions/CreateTransactionUseCase.js';
 import { GetTransactionsUseCase } from '../use-cases/transactions/GetTransactionsUseCase.js';
@@ -11,6 +11,7 @@ import { ImportTransactionsUseCase } from '../use-cases/transactions/ImportTrans
 interface TransactionRouteOptions {
   transactionRepo: ITransactionRepository;
   categoryRepo: ICategoryRepository;
+  merchantRuleRepo?: IMerchantRuleRepository;
 }
 
 const JWT_SECRET = process.env['JWT_SECRET'] ?? 'dev-secret-change-in-prod';
@@ -27,14 +28,14 @@ export default async function transactionRoutes(
   app: FastifyInstance,
   opts: TransactionRouteOptions,
 ): Promise<void> {
-  const { transactionRepo, categoryRepo } = opts;
+  const { transactionRepo, categoryRepo, merchantRuleRepo } = opts;
 
   const createUC = new CreateTransactionUseCase(transactionRepo);
   const getUC = new GetTransactionsUseCase(transactionRepo);
   const getSummaryUC = new GetTransactionSummaryUseCase(transactionRepo, categoryRepo);
   const updateUC = new UpdateTransactionUseCase(transactionRepo);
   const deleteUC = new DeleteTransactionUseCase(transactionRepo);
-  const importUC = new ImportTransactionsUseCase(transactionRepo);
+  const importUC = new ImportTransactionsUseCase(transactionRepo, merchantRuleRepo);
 
   const verifyJwt = makeVerifyJwt(JWT_SECRET);
 
