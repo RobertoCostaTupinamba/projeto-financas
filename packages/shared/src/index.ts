@@ -116,3 +116,38 @@ export interface ITransactionRepository {
   update(id: string, data: UpdateTransactionDto): Promise<Transaction | null>;
   delete(id: string): Promise<void>;
 }
+
+// ---- MerchantRule ----
+export type MatchType = 'exact' | 'partial';
+
+export interface MerchantRule {
+  id: string;
+  userId: string;
+  pattern: string;        // normalized description pattern to match against
+  categoryId: string;
+  matchType: MatchType;
+  createdAt: Date;
+}
+
+export interface CreateMerchantRuleDto {
+  userId: string;
+  pattern: string;
+  categoryId: string;
+  matchType: MatchType;
+}
+
+export interface IMerchantRuleRepository {
+  create(data: CreateMerchantRuleDto): Promise<MerchantRule>;
+  findById(id: string): Promise<MerchantRule | null>;
+  findByUserId(userId: string): Promise<MerchantRule[]>;
+  findByUserIdAndPattern(userId: string, pattern: string): Promise<MerchantRule | null>;
+  delete(id: string): Promise<void>;
+}
+
+// ---- PartialMatchSuggestion (used by ImportTransactionsUseCase in T04) ----
+export interface PartialMatchSuggestion {
+  transactionDescription: string;
+  rule: MerchantRule;
+  /** similarity score 0–1 */
+  score: number;
+}
