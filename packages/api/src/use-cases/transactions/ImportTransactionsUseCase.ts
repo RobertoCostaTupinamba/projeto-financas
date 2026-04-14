@@ -16,7 +16,7 @@ export class ImportTransactionsUseCase {
 
   constructor(
     private readonly transactionRepo: ITransactionRepository,
-    private readonly merchantRuleRepo?: IMerchantRuleRepository,
+    private readonly merchantRuleRepo: IMerchantRuleRepository,
   ) {}
 
   async execute(userId: string, accountId: string, csvText: string): Promise<ImportResult> {
@@ -27,8 +27,7 @@ export class ImportTransactionsUseCase {
     const probableDuplicates: Transaction[] = [];
     const partialMatchSuggestions: PartialMatchSuggestion[] = [];
 
-    // Load merchant rules once before the row loop (only if repo is wired)
-    const rules = this.merchantRuleRepo ? await this.merchantRuleRepo.findByUserId(userId) : [];
+    const rules = await this.merchantRuleRepo.findByUserId(userId);
 
     for (const row of valid) {
       const dateFrom = new Date(row.date);

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ImportTransactionsUseCase } from '../../../use-cases/transactions/ImportTransactionsUseCase.js';
-import type { ITransactionRepository, Transaction, CreateTransactionDto } from '@financas/shared';
+import type { ITransactionRepository, IMerchantRuleRepository, Transaction, CreateTransactionDto } from '@financas/shared';
 
 // ---- helpers ----
 
@@ -32,6 +32,14 @@ const makeRepo = (overrides?: Partial<ITransactionRepository>): ITransactionRepo
   update: vi.fn(async () => null),
   delete: vi.fn(async () => {}),
   ...overrides,
+});
+
+const makeMerchantRuleRepo = (): IMerchantRuleRepository => ({
+  create: vi.fn(),
+  findById: vi.fn(async () => null),
+  findByUserId: vi.fn(async () => []),
+  findByUserIdAndPattern: vi.fn(async () => null),
+  delete: vi.fn(async () => {}),
 });
 
 const VALID_CSV_HEADER = 'Data,Valor,Identificador,Descrição';
@@ -66,7 +74,7 @@ describe('ImportTransactionsUseCase', () => {
       }),
     });
 
-    const useCase = new ImportTransactionsUseCase(repo);
+    const useCase = new ImportTransactionsUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('u1', 'acc1', csv);
 
     expect(result.sessionId).toBeTruthy();
@@ -84,7 +92,7 @@ describe('ImportTransactionsUseCase', () => {
 
   it('returns empty arrays for empty CSV (no lines)', async () => {
     const repo = makeRepo();
-    const useCase = new ImportTransactionsUseCase(repo);
+    const useCase = new ImportTransactionsUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('u1', 'acc1', '');
 
     expect(result.new).toHaveLength(0);
@@ -95,7 +103,7 @@ describe('ImportTransactionsUseCase', () => {
 
   it('returns empty arrays for CSV with only the header row', async () => {
     const repo = makeRepo();
-    const useCase = new ImportTransactionsUseCase(repo);
+    const useCase = new ImportTransactionsUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('u1', 'acc1', VALID_CSV_HEADER);
 
     expect(result.new).toHaveLength(0);
@@ -111,7 +119,7 @@ describe('ImportTransactionsUseCase', () => {
 
     const createSpy = vi.fn(async (data: CreateTransactionDto) => makeTransaction(data));
     const repo = makeRepo({ create: createSpy });
-    const useCase = new ImportTransactionsUseCase(repo);
+    const useCase = new ImportTransactionsUseCase(repo, makeMerchantRuleRepo());
 
     const result = await useCase.execute('u1', 'acc1', csv);
 
@@ -131,7 +139,7 @@ describe('ImportTransactionsUseCase', () => {
     ].join('\n');
 
     const repo = makeRepo();
-    const useCase = new ImportTransactionsUseCase(repo);
+    const useCase = new ImportTransactionsUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('u1', 'acc1', csv);
 
     expect(result.new).toHaveLength(1);

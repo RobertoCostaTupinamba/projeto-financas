@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { GetImportSessionUseCase } from '../../../use-cases/import/GetImportSessionUseCase.js';
 import { ConfirmImportUseCase } from '../../../use-cases/import/ConfirmImportUseCase.js';
 import { CancelImportUseCase } from '../../../use-cases/import/CancelImportUseCase.js';
-import type { ITransactionRepository, Transaction, CreateTransactionDto, UpdateTransactionDto } from '@financas/shared';
+import type { ITransactionRepository, IMerchantRuleRepository, Transaction, CreateTransactionDto, UpdateTransactionDto } from '@financas/shared';
 
 // ---- helpers ----
 
@@ -33,6 +33,14 @@ const makeRepo = (overrides?: Partial<ITransactionRepository>): ITransactionRepo
   update: vi.fn(async (_id: string, data: UpdateTransactionDto) => makeTransaction({ status: data.status })),
   delete: vi.fn(async () => {}),
   ...overrides,
+});
+
+const makeMerchantRuleRepo = (): IMerchantRuleRepository => ({
+  create: vi.fn(),
+  findById: vi.fn(async () => null),
+  findByUserId: vi.fn(async () => []),
+  findByUserIdAndPattern: vi.fn(async () => null),
+  delete: vi.fn(async () => {}),
 });
 
 // ---- GetImportSessionUseCase ----
@@ -97,7 +105,7 @@ describe('ConfirmImportUseCase', () => {
       findByImportSession: vi.fn(async () => []), // no orphans
     });
 
-    const useCase = new ConfirmImportUseCase(repo);
+    const useCase = new ConfirmImportUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('sess-1', 'u1', [{ transactionId: tx1.id, action: 'accept' }]);
 
     expect(updateSpy).toHaveBeenCalledWith(tx1.id, { status: 'confirmed' });
@@ -115,7 +123,7 @@ describe('ConfirmImportUseCase', () => {
       findByImportSession: vi.fn(async () => []), // no orphans
     });
 
-    const useCase = new ConfirmImportUseCase(repo);
+    const useCase = new ConfirmImportUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('sess-1', 'u1', [{ transactionId: tx1.id, action: 'reject' }]);
 
     expect(deleteSpy).toHaveBeenCalledWith(tx1.id);
@@ -136,7 +144,7 @@ describe('ConfirmImportUseCase', () => {
       findByImportSession: vi.fn(async () => [orphanTx]),
     });
 
-    const useCase = new ConfirmImportUseCase(repo);
+    const useCase = new ConfirmImportUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('sess-1', 'u1', [{ transactionId: decidedTx.id, action: 'accept' }]);
 
     // orphan must be cleaned
@@ -156,7 +164,7 @@ describe('ConfirmImportUseCase', () => {
       findByImportSession: vi.fn(async () => [tx]),
     });
 
-    const useCase = new ConfirmImportUseCase(repo);
+    const useCase = new ConfirmImportUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('sess-1', 'u1', [{ transactionId: tx.id, action: 'accept' }]);
 
     // delete was NOT called for the decided tx
@@ -173,7 +181,7 @@ describe('ConfirmImportUseCase', () => {
       findByImportSession: vi.fn(async () => [orphan]),
     });
 
-    const useCase = new ConfirmImportUseCase(repo);
+    const useCase = new ConfirmImportUseCase(repo, makeMerchantRuleRepo());
     const result = await useCase.execute('sess-1', 'u1', []);
 
     expect(deleteSpy).toHaveBeenCalledWith(orphan.id);

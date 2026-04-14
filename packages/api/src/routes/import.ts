@@ -7,7 +7,7 @@ import { CancelImportUseCase } from '../use-cases/import/CancelImportUseCase.js'
 
 interface ImportRouteOptions {
   transactionRepo: ITransactionRepository;
-  merchantRuleRepo?: IMerchantRuleRepository;
+  merchantRuleRepo: IMerchantRuleRepository;
 }
 
 const JWT_SECRET = process.env['JWT_SECRET'] ?? 'dev-secret-change-in-prod';
@@ -19,7 +19,7 @@ export default async function importRoutes(
   const { transactionRepo, merchantRuleRepo } = opts;
 
   const getSessionUC = new GetImportSessionUseCase(transactionRepo);
-  const confirmUC = new ConfirmImportUseCase(transactionRepo);
+  const confirmUC = new ConfirmImportUseCase(transactionRepo, merchantRuleRepo);
   const cancelUC = new CancelImportUseCase(transactionRepo);
 
   const verifyJwt = makeVerifyJwt(JWT_SECRET);
@@ -51,7 +51,7 @@ export default async function importRoutes(
       }
 
       const userId = request.user!.id;
-      const result = await confirmUC.execute(sessionId, userId, decisions, merchantRuleRepo);
+      const result = await confirmUC.execute(sessionId, userId, decisions);
 
       app.log.info(
         { sessionId, accepted: result.accepted.length, rejected: result.rejected, cleaned: result.cleaned },

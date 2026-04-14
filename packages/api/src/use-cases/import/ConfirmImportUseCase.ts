@@ -18,14 +18,12 @@ export interface ConfirmImportResult {
 }
 
 export class ConfirmImportUseCase {
-  constructor(private readonly transactionRepo: ITransactionRepository) {}
+  constructor(
+    private readonly transactionRepo: ITransactionRepository,
+    private readonly merchantRuleRepo: IMerchantRuleRepository,
+  ) {}
 
-  async execute(
-    sessionId: string,
-    userId: string,
-    decisions: ImportDecision[],
-    merchantRuleRepo?: IMerchantRuleRepository,
-  ): Promise<ConfirmImportResult> {
+  async execute(sessionId: string, userId: string, decisions: ImportDecision[]): Promise<ConfirmImportResult> {
     const decided = new Set(decisions.map((d) => d.transactionId));
     const accepted: Transaction[] = [];
     let rejected = 0;
@@ -42,13 +40,8 @@ export class ConfirmImportUseCase {
         }
 
         // Save exact merchant rule if requested
-        if (
-          decision.saveRule &&
-          decision.merchantPattern &&
-          decision.categoryId &&
-          merchantRuleRepo
-        ) {
-          const rule = await merchantRuleRepo.create({
+        if (decision.saveRule && decision.merchantPattern && decision.categoryId) {
+          const rule = await this.merchantRuleRepo.create({
             userId,
             pattern: normalizeMerchant(decision.merchantPattern),
             categoryId: decision.categoryId,
@@ -59,8 +52,8 @@ export class ConfirmImportUseCase {
         }
 
         // Save confirmed_partial rule if user accepted a partial-match suggestion
-        if (decision.acceptRuleSuggestion && decision.ruleSuggestion && merchantRuleRepo) {
-          const rule = await merchantRuleRepo.create({
+        if (decision.acceptRuleSuggestion && decision.ruleSuggestion) {
+          const rule = await this.merchantRuleRepo.create({
             userId,
             pattern: decision.ruleSuggestion.merchantPattern,
             categoryId: decision.ruleSuggestion.categoryId,

@@ -8,6 +8,7 @@ import { MongoUserRepository } from '../../infrastructure/repositories/MongoUser
 import { MongoAccountRepository } from '../../infrastructure/repositories/MongoAccountRepository.js';
 import { MongoCategoryRepository } from '../../infrastructure/repositories/MongoCategoryRepository.js';
 import { MongoTransactionRepository } from '../../infrastructure/repositories/MongoTransactionRepository.js';
+import { MongoMerchantRuleRepository } from '../../infrastructure/repositories/MongoMerchantRuleRepository.js';
 import { UserModel } from '../../infrastructure/db/UserModel.js';
 import { CategoryModel } from '../../infrastructure/db/CategoryModel.js';
 
@@ -24,8 +25,9 @@ beforeAll(async () => {
   const accountRepo = new MongoAccountRepository();
   const categoryRepo = new MongoCategoryRepository();
   const transactionRepo = new MongoTransactionRepository();
+  const merchantRuleRepo = new MongoMerchantRuleRepository();
   app = await buildServer();
-  await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo, transactionRepo });
+  await registerRoutes(app, { userRepo, redis, accountRepo, categoryRepo, transactionRepo, merchantRuleRepo });
   await app.ready();
 });
 

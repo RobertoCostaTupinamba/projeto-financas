@@ -11,7 +11,7 @@ import { ImportTransactionsUseCase } from '../use-cases/transactions/ImportTrans
 interface TransactionRouteOptions {
   transactionRepo: ITransactionRepository;
   categoryRepo: ICategoryRepository;
-  merchantRuleRepo?: IMerchantRuleRepository;
+  merchantRuleRepo: IMerchantRuleRepository;
 }
 
 const JWT_SECRET = process.env['JWT_SECRET'] ?? 'dev-secret-change-in-prod';
